@@ -1,45 +1,144 @@
 # ipatoolUI
 
-Native SwiftUI wrapper around [ipatool](https://github.com/majd/ipatool) that keeps every CLI feature one click away.
+A native iOS application for downloading IPA files from the App Store, along with its dedicated HTTP API server.
 
-<img width="901" height="656" alt="Screenshot 2025-11-12 alle 01 02 02" src="https://github.com/user-attachments/assets/d46f1738-c6d2-4df5-b101-802a1d63ff0f" />
+> **Note**: This is a personal tool project. Use at your own discretion.
 
-## Features
+## Project Overview
 
-- Authenticate Apple IDs (login, info, revoke) with inline 2FA handling.
-- Search for apps, inspect metadata, and initiate purchases directly from results.
-- Manually purchase licenses, list all available versions, and inspect version metadata.
-- Download IPA files with optional automatic purchasing and destination picker.
-- Real-time command log with stdout/stderr capture for debugging.
-- Preferences pane to point at a custom `ipatool` binary, toggle verbose/non-interactive flags, and store the keychain passphrase.
-- Currency formatting with locale selection support: automatically detect account/system locale or manually select from 60+ countries/regions for proper currency symbol display (¥, €, £, $, etc.).
+This repository contains two main components:
 
-## Project structure
+1. **`ipatool-api/`** - HTTP API server for App Store interactions (Go)
+2. **`ipatoolUI-iOS/`** - Native iOS client application (SwiftUI)
 
-- `ipatoolUI.xcodeproj` – macOS SwiftUI app target (minimum macOS 13).
-- `ipatoolUI/` – application sources, SwiftUI views, view models, services, and resources.
-- `Resources/Assets.xcassets` – placeholder app icon and preview assets.
+### Component Relationship
 
-## Getting started
+```
+┌─────────────────┐         HTTP API          ┌──────────────┐
+│ ipatoolUI-iOS   │ ──────────────────────────> │ ipatool-api  │
+│  (iOS Client)   │ <────────────────────────── │  (Server)    │
+└─────────────────┘                             └──────────────┘
+                                                         │
+                                                         │ App Store API
+                                                         ▼
+                                                 ┌──────────────┐
+                                                 │  App Store   │
+                                                 └──────────────┘
+```
 
-1. Install `ipatool` (e.g. `brew install ipatool`).
-2. Open `ipatoolUI.xcodeproj` in Xcode 15 or newer.
-3. Select the *ipatoolUI* scheme and build/run on macOS 13+.
-4. On first launch, visit **Settings → ipatool Binary** to confirm the executable path if it is not auto-detected.
+**Important**: `ipatool-api` and `ipatoolUI-iOS` are designed to work together. The iOS app requires a running `ipatool-api` server instance to function.
 
-## Using the app
+## Quick Start
 
-- **Authentication**: provide Apple‑ID credentials (password stays local) and sign in. Use *Account Info* to verify the active session or *Revoke* to clear credentials.
-- **Search**: look up apps, inspect bundles, and trigger purchases for any result.
-- **Purchase**: obtain licenses manually by bundle identifier.
-- **Versions**: list every external version identifier for an app; copy IDs for later use.
-- **Download**: choose app/bundle, optional version, destination, and whether to auto‑purchase. Progress and results surface in the status area and logs.
-- **Version Metadata**: resolve release details for a specific external version.
-- **Logs**: inspect every launched `ipatool` command, with sanitized arguments and captured stdout/stderr.
-- **Settings**: configure the executable location, passphrase, verbosity, non-interactive behavior, and currency display locale. The app automatically detects your system locale or account region, but you can manually select any supported country/region for currency formatting.
+### For iOS Users
 
-## Notes
+1. **Start the API server**:
+   ```bash
+   cd ipatool-api
+   go build -o ipaserver .
+   ./ipaserver -port 8080
+   ```
+   Optionally use API key authentication: `./ipaserver -port 8080 -api-key "your-secret-key"`  
+   On some systems you may need to set `IPATOOL_KEYCHAIN_PASSPHRASE` for non-interactive keychain access.
 
-- The UI always invokes `ipatool` with `--format json` so responses can be parsed automatically.
-- Sensitive flags (passwords, OTP codes, keychain passphrases) are masked inside the command log.
-- The app delegates complex state (command history, user preferences) to `UserDefaults`, so reruns preserve your setup.
+2. **Build and run the iOS app**:
+   - Open `ipatoolUI-iOS/ipatoolUI-iOS.xcodeproj` in Xcode
+   - Configure the API base URL in Settings (default: `http://localhost:8080`)
+   - Build and run on iOS 17+ device or simulator
+
+See [`ipatoolUI-iOS/README.md`](ipatoolUI-iOS/README.md) for detailed iOS setup instructions.
+
+## Component Details
+
+### ipatool-api
+
+A server-only HTTP API for App Store interactions. Provides REST endpoints for authentication, search, purchase, version management, and IPA downloads.
+
+- **Language**: Go
+- **Requirements**: Go 1.19+ (1.23 recommended), Apple ID
+- **Documentation**: [`ipatool-api/README.md`](ipatool-api/README.md)
+
+**Key Features**:
+- REST API for remote clients
+- Streaming downloads for multi-GB files
+- Optional API key authentication
+- Structured JSON logging
+- Automatic port selection
+
+### ipatoolUI-iOS
+
+Native iOS application built with SwiftUI. Connects to `ipatool-api` server to provide a full-featured App Store client.
+
+- **Language**: Swift
+- **Requirements**: iOS 17.0+, Xcode 15.0+
+- **Documentation**: [`ipatoolUI-iOS/README.md`](ipatoolUI-iOS/README.md)
+
+**Key Features**:
+- Multi-language support (Japanese, English, Chinese)
+- Currency formatting with locale selection
+- Long-press actions for copying bundle IDs and versions
+- Optimized downloads for large files
+- Modern iOS 17+ UI design
+
+## Architecture
+
+### Server-Client Architecture
+
+The iOS app (`ipatoolUI-iOS`) communicates with the API server (`ipatool-api`) via HTTP REST API:
+
+- **Authentication**: `/api/v1/auth/*`
+- **Search**: `/api/v1/search`
+- **Purchase**: `/api/v1/purchase`
+- **Versions**: `/api/v1/versions`
+- **Version Metadata**: `/api/v1/metadata`
+- **Download**: `/api/v1/download`
+
+The server handles all App Store interactions and provides a clean API interface for clients.
+
+### Network Configuration
+
+For local development:
+- **iOS Simulator**: Use `http://localhost:8080`
+- **Physical Device**: Use `http://<server-ip>:8080` (e.g., `http://192.168.1.100:8080`)
+
+The iOS app includes App Transport Security (ATS) configuration to allow local network connections.
+
+## Development
+
+### Building from Source
+
+**API Server**:
+```bash
+cd ipatool-api
+go build -o ipaserver .
+```
+
+**iOS App**:
+```bash
+cd ipatoolUI-iOS
+open ipatoolUI-iOS.xcodeproj
+# Build in Xcode
+```
+
+### Project Structure
+
+```
+ipatoolUI/
+├── ipatool-api/          # Go HTTP API server
+│   ├── main.go           # Entry point
+│   ├── cmd/              # Server handlers & middleware
+│   ├── pkg/              # Core packages
+│   └── README.md         # Server documentation
+├── ipatoolUI-iOS/        # iOS SwiftUI client
+│   ├── ipatoolUI-iOS/    # Source code
+│   └── README.md         # iOS documentation
+└── README.md             # This file
+```
+
+## License
+
+MIT License - See [`ipatool-api/LICENSE`](ipatool-api/LICENSE) for details.
+
+## Disclaimer
+
+This is a personal tool project. Use at your own risk. The tools interact with Apple's App Store and may be subject to Apple's Terms of Service.
