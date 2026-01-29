@@ -58,7 +58,7 @@ What you need to install depends on where you run **ipatool-api** (the server) a
 |----|-------------------|------------------------|
 | **macOS** | [Go](https://go.dev/dl/) 1.19+, Apple ID | [ideviceinstaller](https://github.com/libimobiledevice/ideviceinstaller) (e.g. `brew install ideviceinstaller`). iPhone/iPad connected via USB. |
 | **Linux** | Go 1.19+, Apple ID | [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice) and **ideviceinstaller** (package name may be `ideviceinstaller` or `libimobiledevice-utils`). iPhone/iPad connected via USB. |
-| **Windows** | Go 1.19+, Apple ID | Not supported by default (no `ideviceinstaller`). Auth, search, purchase, download work. To install to device, run the server on macOS/Linux, or set `IPATOOL_INSTALL_CMD` to a Windows-compatible installer if you have one. |
+| **Windows** | Go 1.19+, Apple ID | Use [libimobiledevice-win32](https://github.com/libimobiledevice-win32) / [imobiledevice-net](https://github.com/libimobiledevice-win32/imobiledevice-net/releases) (Windows builds of libimobiledevice tools) to get an `ideviceinstaller`-style CLI; put it on PATH or set `IPATOOL_INSTALL_CMD`. iPhone/iPad connected via USB (iTunes/Apple USB drivers may be required). Auth, search, purchase, download work without this. |
 
 - On **macOS**, non-interactive keychain access may require `IPATOOL_KEYCHAIN_PASSPHRASE`.
 - Credentials: macOS Keychain, Linux Secret Service / file, Windows Credential Manager / file.
