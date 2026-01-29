@@ -123,8 +123,9 @@ On some systems you may need `IPATOOL_KEYCHAIN_PASSPHRASE` for non-interactive k
 
 ### Install to Device
 
-1. **Install** tab → select a downloaded IPA or provide app/version to install.
-2. iPhone must be connected via USB to the machine running ipatool-api. The server uses `ideviceinstaller` (or override via `IPATOOL_INSTALL_CMD`) to install the IPA.
+1. **Install** tab → enter Bundle ID (or App ID), optional version ID and device UDID → turn **Auto Purchase** on if needed → tap **Install to device**.
+2. The app sends the request to ipatool-api. The **server** (Mac/PC) then: downloads the IPA from the App Store to a temp file → runs the install command (e.g. `ideviceinstaller install <path>`) on the server machine → the IPA is installed on the **iPhone/iPad that is USB-connected to that server**.
+3. The device that receives the app is the one **USB-connected to the machine running ipatool-api**, not the device running the app (unless they are the same). See [ipatool-api README – Install flow](../ipatool-api/README.md#install-flow-what-happens-when-you-tap-install-in-the-app) for the full step-by-step.
 
 ### Version Metadata
 

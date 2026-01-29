@@ -25,7 +25,7 @@ A dedicated HTTP API server for App Store interactions: authentication, search, 
 
 ### Windows
 
-The server runs on **Windows**. Authentication, search, purchase, version list, metadata, and **IPA download** all work; credentials are stored via Windows Credential Manager (or file backend). **Install to Device** uses `ideviceinstaller` by default, which is not standard on Windows; use macOS or Linux for install-to-device, or set `IPATOOL_INSTALL_CMD` to a Windows-compatible installer if you have one.
+The server runs on **Windows**. Authentication, search, purchase, version list, metadata, and **IPA download** all work; credentials are stored via Windows Credential Manager (or file backend). For **Install to Device** on Windows, use [libimobiledevice-win32](https://github.com/libimobiledevice-win32) or [imobiledevice-net](https://github.com/libimobiledevice-win32/imobiledevice-net/releases) (Windows builds of libimobiledevice tools) to get an `ideviceinstaller`-compatible CLI; put the executable on PATH or set `IPATOOL_INSTALL_CMD` to its path. iPhone/iPad must be connected via USB (iTunes for Windows / Apple USB drivers may be required for pairing).
 
 ## Security Features
 
@@ -80,7 +80,7 @@ go build -o ipaserver .
   - Example: `CORS_ALLOWED_ORIGINS=http://localhost:3000,https://example.com`
 - `DEBUG`: Set to `true` to enable detailed error messages (default: `false`)
 - `IPATOOL_PORT_FILE`: Optional file path to write the actual port number when using random port
-- `IPATOOL_INSTALL_CMD`: Override the install command (default: `ideviceinstaller`). Server runs `<cmd> install <path>` to install the IPA on the USB-connected device.
+- `IPATOOL_INSTALL_CMD`: Override the install command (default: `ideviceinstaller`). Server runs `<cmd> install <path>` or `<cmd> -u <UDID> install <path>`. Sample wrappers: [scripts/install-ipa.example.sh](scripts/install-ipa.example.sh) (macOS/Linux), [scripts/install-ipa.example.ps1](scripts/install-ipa.example.ps1) (Windows). See [scripts/README.md](scripts/README.md).
 
 ## API Endpoints
 
@@ -289,6 +289,29 @@ curl -X POST http://localhost:8080/api/v1/install \
 ```
 
 **Requirements:** iPhone/iPad connected via USB to the machine running ipatool-api; `ideviceinstaller` (or the command set in `IPATOOL_INSTALL_CMD`) available on that machine.
+
+#### Install flow (what happens when you tap Install in the app)
+
+1. **You (on the iOS app)**  
+   Open the **Install** tab → enter Bundle ID (or App ID), optional version ID / device UDID → turn **Auto Purchase** on if needed → tap **Install to device**.
+
+2. **App → server**  
+   The app sends `POST /api/v1/install` to the ipatool-api server (Mac/PC) with the bundle ID, version, auto_purchase, and optional device UDID.
+
+3. **Server (ipatool-api on the Mac/PC)**  
+   - Validates the request and uses the stored Apple ID (you must be signed in on the server).  
+   - If **Auto Purchase** is on, purchases the app license if needed.  
+   - **Downloads the IPA from the App Store** to a temporary file on the **server machine** (e.g. `/tmp/ipatool-install-xxxxx.ipa`).  
+   - Runs the install command on the server, e.g.  
+     `ideviceinstaller install /tmp/ipatool-install-xxxxx.ipa`  
+     or `ideviceinstaller -u <UDID> install /tmp/...`  
+     (or whatever you set in `IPATOOL_INSTALL_CMD`).  
+   - That command installs the IPA on the **iPhone/iPad that is connected via USB to the server** (the Mac/PC).  
+   - Deletes the temporary IPA.  
+   - Returns success or error to the app.
+
+4. **Important**  
+   The device that **receives** the installed app is the one **USB-connected to the machine running ipatool-api**, not necessarily the device running the app. Typical setup: **Mac running ipatool-api** + **one iPhone connected by USB to that Mac**; you use the app on that same iPhone (or on another device) to trigger install → the IPA is installed on the USB-connected iPhone.
 
 ### Health Check
 
