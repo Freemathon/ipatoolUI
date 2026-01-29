@@ -81,10 +81,38 @@ struct DownloadView: View {
                         .buttonStyle(.bordered)
                         .frame(maxWidth: .infinity)
                     }
-                    .sheet(isPresented: $showShareSheet) {
+                    .sheet(isPresented: $showShareSheet, onDismiss: {
+                        if appState.preferences.deleteIPAAfterShare ?? false {
+                            viewModel.deleteLastDownloadedFileAfterShare()
+                        }
+                        viewModel.refreshDownloadedFilesList()
+                    }) {
                         ShareSheet(items: [fileURL])
                     }
                 }
+            }
+            
+            Section {
+                ForEach(viewModel.downloadedFileURLs, id: \.path) { url in
+                    HStack {
+                        Text(url.lastPathComponent)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Spacer()
+                        Button(role: .destructive) {
+                            viewModel.deleteFile(at: url)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
+                }
+                if !viewModel.downloadedFileURLs.isEmpty {
+                    Button(role: .destructive, action: { viewModel.deleteAllDownloadedFiles() }) {
+                        Label(appState.localizationManager.strings.deleteAll, systemImage: "trash.fill")
+                    }
+                }
+            } header: {
+                Text(appState.localizationManager.strings.downloadedFiles)
             }
             
             if let status = viewModel.statusMessage {
@@ -110,6 +138,9 @@ struct DownloadView: View {
         .formStyle(.grouped)
         .task {
             viewModel.ensureSuggestedFilename()
+        }
+        .onAppear {
+            viewModel.refreshDownloadedFilesList()
         }
     }
     

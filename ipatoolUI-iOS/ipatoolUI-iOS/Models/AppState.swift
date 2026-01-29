@@ -48,12 +48,14 @@ struct Preferences: Codable, Equatable {
     var apiKey: String
     var language: AppLanguage? // User-selected language (nil means auto-detect)
     var selectedCountryCode: String? // User-selected locale for currency display (nil means auto-detect)
+    var deleteIPAAfterShare: Bool? // Delete downloaded IPA after sharing (nil = false for backward compatibility)
     
     static let `default` = Preferences(
         apiBaseURL: "http://localhost:8080",
         apiKey: "",
         language: nil,
-        selectedCountryCode: nil
+        selectedCountryCode: nil,
+        deleteIPAAfterShare: false
     )
 }
 

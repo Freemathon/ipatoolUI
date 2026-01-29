@@ -138,6 +138,46 @@ struct LocalizedStrings {
         }
     }
     
+    var deleteIPAAfterShare: String {
+        switch language {
+        case .japanese: return "共有後にIPAを削除"
+        case .english: return "Delete IPA after share"
+        case .chinese: return "分享后删除IPA"
+        }
+    }
+    
+    var deleteIPAAfterShareFooter: String {
+        switch language {
+        case .japanese: return "共有シートを閉じたときに、直前にダウンロードしたIPAを削除します。キャッシュの蓄積を防ぎます。"
+        case .english: return "Deletes the last downloaded IPA when the share sheet is dismissed. Helps avoid cache buildup."
+        case .chinese: return "关闭分享面板时删除最近下载的IPA，避免缓存堆积。"
+        }
+    }
+    
+    var downloadedFiles: String {
+        switch language {
+        case .japanese: return "ダウンロードしたIPA"
+        case .english: return "Downloaded IPAs"
+        case .chinese: return "已下载的IPA"
+        }
+    }
+    
+    var deleteAll: String {
+        switch language {
+        case .japanese: return "すべて削除"
+        case .english: return "Delete all"
+        case .chinese: return "全部删除"
+        }
+    }
+    
+    var allIPAsDeleted: String {
+        switch language {
+        case .japanese: return "すべてのIPAを削除しました"
+        case .english: return "All IPAs deleted"
+        case .chinese: return "已删除全部IPA"
+        }
+    }
+    
     var versionMetadata: String {
         switch language {
         case .japanese: return "メタデータ"

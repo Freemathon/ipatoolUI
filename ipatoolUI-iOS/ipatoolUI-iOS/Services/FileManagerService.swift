@@ -57,4 +57,29 @@ final class FileManagerService {
     func fileExists(at url: URL) -> Bool {
         fileManager.fileExists(atPath: url.path)
     }
+    
+    /// Documents内の .ipa ファイル一覧を取得（更新日時降順）
+    func listIPAFiles() -> [URL] {
+        guard let contents = try? fileManager.contentsOfDirectory(
+            at: documentsDirectory,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: .skipsHiddenFiles
+        ) else { return [] }
+        
+        return contents
+            .filter { $0.pathExtension.lowercased() == "ipa" }
+            .sorted { url1, url2 in
+                let d1 = (try? url1.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                let d2 = (try? url2.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                return d1 > d2
+            }
+    }
+    
+    /// Documents内の全 .ipa を削除
+    func deleteAllIPAFiles() throws {
+        let urls = listIPAFiles()
+        for url in urls {
+            try fileManager.removeItem(at: url)
+        }
+    }
 }

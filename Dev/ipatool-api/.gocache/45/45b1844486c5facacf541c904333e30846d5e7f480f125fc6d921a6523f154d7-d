@@ -1,0 +1,7 @@
+./client.go
+./constants.go
+./cookiejar.go
+./method.go
+./payload.go
+./request.go
+./result.go

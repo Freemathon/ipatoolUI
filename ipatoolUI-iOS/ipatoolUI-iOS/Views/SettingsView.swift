@@ -102,6 +102,17 @@ struct SettingsView: View {
             }
             
             Section {
+                Toggle(appState.localizationManager.strings.deleteIPAAfterShare, isOn: Binding(
+                    get: { appState.preferences.deleteIPAAfterShare ?? false },
+                    set: { appState.preferences.deleteIPAAfterShare = $0 }
+                ))
+            } header: {
+                Text(appState.localizationManager.strings.download)
+            } footer: {
+                Text(appState.localizationManager.strings.deleteIPAAfterShareFooter)
+            }
+            
+            Section {
                 Button(appState.localizationManager.strings.resetToDefault, role: .destructive) {
                     appState.preferences = Preferences.default
                 }

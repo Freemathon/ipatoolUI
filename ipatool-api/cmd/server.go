@@ -60,6 +60,7 @@ func runServer(port int, apiKey string) error {
 	protectedAPI.HandleFunc("/versions", handleListVersions).Methods("GET")
 	protectedAPI.HandleFunc("/metadata", handleVersionMetadata).Methods("GET")
 	protectedAPI.HandleFunc("/download", handleDownload).Methods("POST")
+	protectedAPI.HandleFunc("/install", handleInstall).Methods("POST")
 
 	// Health check and root endpoints (no authentication required)
 	router.HandleFunc("/health", handleHealth).Methods("GET")
@@ -271,6 +272,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 			"list_versions":    "GET /api/v1/versions",
 			"version_metadata": "GET /api/v1/metadata",
 			"download":         "POST /api/v1/download",
+			"install":          "POST /api/v1/install",
 		},
 	})
 }
