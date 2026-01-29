@@ -48,11 +48,36 @@ This repository contains two main components:
 
 See [`ipatoolUI-iOS/README.md`](ipatoolUI-iOS/README.md) for detailed iOS setup instructions.
 
+## Requirements by OS
+
+What you need to install depends on where you run **ipatool-api** (the server) and where you build **ipatoolUI-iOS** (the iOS app).
+
+### Running ipatool-api (server)
+
+| OS | To run the server | For Install to Device |
+|----|-------------------|------------------------|
+| **macOS** | [Go](https://go.dev/dl/) 1.19+, Apple ID | [ideviceinstaller](https://github.com/libimobiledevice/ideviceinstaller) (e.g. `brew install ideviceinstaller`). iPhone/iPad connected via USB. |
+| **Linux** | Go 1.19+, Apple ID | [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice) and **ideviceinstaller** (package name may be `ideviceinstaller` or `libimobiledevice-utils`). iPhone/iPad connected via USB. |
+| **Windows** | Go 1.19+, Apple ID | Not supported by default (no `ideviceinstaller`). Auth, search, purchase, download work. To install to device, run the server on macOS/Linux, or set `IPATOOL_INSTALL_CMD` to a Windows-compatible installer if you have one. |
+
+- On **macOS**, non-interactive keychain access may require `IPATOOL_KEYCHAIN_PASSPHRASE`.
+- Credentials: macOS Keychain, Linux Secret Service / file, Windows Credential Manager / file.
+
+### Building and running ipatoolUI-iOS (iOS app)
+
+| OS | Build / run |
+|----|-------------|
+| **macOS** | [Xcode](https://developer.apple.com/xcode/) 15+ (Swift 5.9+). Open `ipatoolUI-iOS/ipatoolUI-iOS.xcodeproj`, build and run on simulator or device (iOS 17+). |
+| **Linux** | Cannot build the iOS app (Xcode is macOS-only). Use a Mac or CI on macOS to build. |
+| **Windows** | Cannot build the iOS app (Xcode is macOS-only). Use a Mac or CI on macOS to build. |
+
+The **iOS app** itself runs only on iPhone/iPad (or simulator on a Mac). The **server** (ipatool-api) can run on Windows, Linux, or macOS so that the app can connect to it over the network.
+
 ## Component Details
 
 ### ipatool-api
 
-A server-only HTTP API for App Store interactions. Provides REST endpoints for authentication, search, purchase, version management, IPA download, and install to a USB-connected device.
+A server-only HTTP API for App Store interactions. Provides REST endpoints for authentication, search, purchase, version management, IPA download, and install to a USB-connected device. Runs on **Windows**, Linux, and macOS; Install to Device typically uses macOS/Linux (ideviceinstaller).
 
 - **Language**: Go
 - **Requirements**: Go 1.19+ (1.23 recommended), Apple ID

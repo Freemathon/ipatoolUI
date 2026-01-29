@@ -58,6 +58,7 @@ func newKeychain(machine machine.Machine, logger log.Logger) keychain.Keychain {
 	ring := util.Must(keyring.Open(keyring.Config{
 		AllowedBackends: []keyring.BackendType{
 			keyring.KeychainBackend,
+			keyring.WinCredBackend,
 			keyring.SecretServiceBackend,
 			keyring.FileBackend,
 		},

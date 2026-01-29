@@ -18,10 +18,14 @@ A dedicated HTTP API server for App Store interactions: authentication, search, 
 
 ## Requirements
 
-- Supported operating system (Windows, Linux, or macOS)
+- Supported operating system: **Windows**, Linux, or macOS
 - Go 1.19+ (for building from source)
 - Apple ID set up to use the App Store
-- For **Install to Device**: iPhone/iPad connected via USB to the machine running the server; `ideviceinstaller` (or override via `IPATOOL_INSTALL_CMD`) on the server host
+- For **Install to Device**: iPhone/iPad connected via USB to the machine running the server; `ideviceinstaller` (or override via `IPATOOL_INSTALL_CMD`) on the server host. **Install to Device** is typically used on macOS/Linux (where `ideviceinstaller` is available); on Windows you can still run the server for auth, search, purchase, download—only the install step requires a compatible tool on the server.
+
+### Windows
+
+The server runs on **Windows**. Authentication, search, purchase, version list, metadata, and **IPA download** all work; credentials are stored via Windows Credential Manager (or file backend). **Install to Device** uses `ideviceinstaller` by default, which is not standard on Windows; use macOS or Linux for install-to-device, or set `IPATOOL_INSTALL_CMD` to a Windows-compatible installer if you have one.
 
 ## Security Features
 
